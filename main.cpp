@@ -48,10 +48,22 @@ int main() {
     httplib::Server server;
 
     // ----------------------------------------------------------
-    // GET / - Welcome page
+    // GET / - Dashboard with start quiz + live leaderboard
     // ----------------------------------------------------------
     server.Get("/", [](const httplib::Request& req, httplib::Response& res) {
-        res.set_content(welcomePage(), "text/html");
+        res.set_content(dashboardPage(), "text/html");
+    });
+
+    // ----------------------------------------------------------
+    // GET /leaderboard-widget - Auto-refreshing leaderboard for iframe
+    // ----------------------------------------------------------
+    server.Get("/leaderboard-widget", [](const httplib::Request& req, httplib::Response& res) {
+        leaderboardMutex.lock();
+        vector<Player> board = readLeaderboard(LEADERBOARD_FILE);
+        leaderboardMutex.unlock();
+
+        string html = leaderboardWidget(board, QUESTIONS_PER_ROUND);
+        res.set_content(html, "text/html");
     });
 
     // ----------------------------------------------------------

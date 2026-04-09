@@ -11,8 +11,11 @@ using namespace std;
 // Returns the shared CSS styles used by all pages
 string getStyles();
 
-// Welcome page with name input form
-string welcomePage();
+// Dashboard page with start quiz form + live leaderboard
+string dashboardPage();
+
+// Leaderboard widget for embedding in iframe (auto-refreshes)
+string leaderboardWidget(const vector<Player>& board, int totalQuestions);
 
 // Question page showing a code snippet and answer form
 // hiddenState is passed through forms to track game progress

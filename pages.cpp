@@ -16,6 +16,7 @@ string getStyles() {
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         .container {
             background: #1a1a2e;
@@ -24,6 +25,57 @@ string getStyles() {
             max-width: 700px;
             width: 90%;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .dashboard-container {
+            background: none;
+            max-width: 1100px;
+            width: 95%;
+            padding: 0;
+            box-shadow: none;
+        }
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .dashboard-grid {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+        .dashboard-left {
+            flex: 1;
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 36px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .dashboard-right {
+            flex: 1;
+            background: #1a1a2e;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            min-height: 480px;
+        }
+        .dashboard-right iframe {
+            width: 100%;
+            height: 480px;
+            border: none;
+        }
+        .live-badge {
+            display: inline-block;
+            background: #1a4731;
+            color: #4ade80;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 8px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         h1 {
             color: #00d4ff;
@@ -79,6 +131,11 @@ string getStyles() {
         }
         .btn:hover { background: #00b8d9; }
         .btn-center { display: block; width: 100%; text-align: center; }
+        .btn-large {
+            padding: 18px 40px;
+            font-size: 1.3em;
+            margin-top: 8px;
+        }
         .code-box {
             background: #0d1117;
             border: 1px solid #333;
@@ -184,6 +241,17 @@ string getStyles() {
         .nav-links a {
             margin: 0 12px;
         }
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                flex-direction: column;
+            }
+            .dashboard-right {
+                min-height: 400px;
+            }
+            .dashboard-right iframe {
+                height: 400px;
+            }
+        }
     )";
 }
 
@@ -204,27 +272,118 @@ string htmlShell(const string& title, const string& body) {
 }
 
 // ============================================================
-// Welcome Page
+// Dashboard Page (two-column: start quiz + live leaderboard)
 // ============================================================
 
-string welcomePage() {
-    string body = "";
-    body += "<h1>GUESS THE OUTPUT</h1>\n";
-    body += "<p class=\"subtitle\">C++ Code Quiz Arcade</p>\n";
-    body += "<div class=\"instructions\">\n";
-    body += "  Read short C++ code snippets. Type what you think they output.<br>\n";
-    body += "  5 questions per round. Fast answers earn bonus points!\n";
-    body += "</div>\n";
-    body += "<form method=\"POST\" action=\"/start\">\n";
-    body += "  <label style=\"color:#aaa; font-size:0.9em;\">Enter your name:</label>\n";
-    body += "  <input type=\"text\" name=\"name\" placeholder=\"Your name\" required autofocus>\n";
-    body += "  <button type=\"submit\" class=\"btn btn-center\">Start Game</button>\n";
-    body += "</form>\n";
-    body += "<div class=\"nav-links\">\n";
-    body += "  <a href=\"/leaderboard\">View Leaderboard</a>\n";
-    body += "</div>\n";
+string dashboardPage() {
+    string html = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n";
+    html += "  <meta charset=\"UTF-8\">\n";
+    html += "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
+    html += "  <title>Guess the Output - Dashboard</title>\n";
+    html += "  <style>" + getStyles() + "</style>\n";
+    html += "</head>\n<body>\n";
+    html += "  <div class=\"container dashboard-container\">\n";
 
-    return htmlShell("Guess the Output", body);
+    // Header
+    html += "    <div class=\"dashboard-header\">\n";
+    html += "      <h1>GUESS THE OUTPUT</h1>\n";
+    html += "      <p class=\"subtitle\">C++ Code Quiz Arcade</p>\n";
+    html += "    </div>\n";
+
+    // Two-column grid
+    html += "    <div class=\"dashboard-grid\">\n";
+
+    // Left column: start quiz
+    html += "      <div class=\"dashboard-left\">\n";
+    html += "        <h2>Ready to play?</h2>\n";
+    html += "        <div class=\"instructions\">\n";
+    html += "          Read short C++ code snippets and type what you think they output.<br><br>\n";
+    html += "          <strong>23 questions</strong> &mdash; all randomized, no repeats.<br>\n";
+    html += "          Each correct answer earns <strong>20 points</strong>.<br>\n";
+    html += "          Can you top the leaderboard?\n";
+    html += "        </div>\n";
+    html += "        <form method=\"POST\" action=\"/start\">\n";
+    html += "          <label style=\"color:#aaa; font-size:0.9em;\">Enter your name:</label>\n";
+    html += "          <input type=\"text\" name=\"name\" placeholder=\"Your name\" required autofocus>\n";
+    html += "          <button type=\"submit\" class=\"btn btn-center btn-large\">Start Quiz</button>\n";
+    html += "        </form>\n";
+    html += "      </div>\n";
+
+    // Right column: live leaderboard iframe
+    html += "      <div class=\"dashboard-right\">\n";
+    html += "        <iframe src=\"/leaderboard-widget\"></iframe>\n";
+    html += "      </div>\n";
+
+    html += "    </div>\n";  // end grid
+    html += "  </div>\n";    // end container
+    html += "</body>\n</html>";
+
+    return html;
+}
+
+// ============================================================
+// Leaderboard Widget (for iframe, auto-refreshes every 5 sec)
+// ============================================================
+
+string leaderboardWidget(const vector<Player>& board, int totalQuestions) {
+    string html = "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n";
+    html += "  <meta charset=\"UTF-8\">\n";
+    html += "  <meta http-equiv=\"refresh\" content=\"5\">\n";
+    html += "  <style>\n";
+    html += "    * { margin: 0; padding: 0; box-sizing: border-box; }\n";
+    html += "    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1a1a2e; color: #e0e0e0; padding: 24px; }\n";
+    html += "    .widget-header { display: flex; align-items: center; margin-bottom: 20px; }\n";
+    html += "    .widget-header h2 { color: #00d4ff; font-size: 1.3em; }\n";
+    html += "    .live-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; margin-left: 10px; animation: pulse 2s infinite; }\n";
+    html += "    .live-label { color: #4ade80; font-size: 0.8em; font-weight: bold; margin-left: 6px; }\n";
+    html += "    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }\n";
+    html += "    table { width: 100%; border-collapse: collapse; }\n";
+    html += "    th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #333; color: #00d4ff; font-size: 0.85em; }\n";
+    html += "    td { padding: 8px 10px; border-bottom: 1px solid #222; }\n";
+    html += "    .rank-1 td:first-child { color: #ffd700; font-weight: bold; }\n";
+    html += "    .rank-2 td:first-child { color: #c0c0c0; font-weight: bold; }\n";
+    html += "    .rank-3 td:first-child { color: #cd7f32; font-weight: bold; }\n";
+    html += "    .empty-msg { color: #888; text-align: center; padding: 60px 0; }\n";
+    html += "  </style>\n";
+    html += "</head>\n<body>\n";
+
+    // Header with live indicator
+    html += "  <div class=\"widget-header\">\n";
+    html += "    <h2>Leaderboard</h2>\n";
+    html += "    <div class=\"live-dot\"></div>\n";
+    html += "    <span class=\"live-label\">LIVE</span>\n";
+    html += "  </div>\n";
+
+    if (board.empty()) {
+        html += "  <p class=\"empty-msg\">No scores yet.<br>Be the first to play!</p>\n";
+    } else {
+        html += "  <table>\n";
+        html += "    <tr><th>Rank</th><th>Name</th><th>Score</th><th>Correct</th></tr>\n";
+
+        int showCount = 10;
+        if ((int)board.size() < showCount) {
+            showCount = board.size();
+        }
+
+        for (int i = 0; i < showCount; i++) {
+            string rowClass = "";
+            if (i == 0) rowClass = " class=\"rank-1\"";
+            if (i == 1) rowClass = " class=\"rank-2\"";
+            if (i == 2) rowClass = " class=\"rank-3\"";
+
+            html += "    <tr" + rowClass + ">";
+            html += "<td>#" + to_string(i + 1) + "</td>";
+            html += "<td>" + board[i].name + "</td>";
+            html += "<td>" + to_string(board[i].score) + "</td>";
+            html += "<td>" + to_string(board[i].correctCount) + "/" + to_string(totalQuestions) + "</td>";
+            html += "</tr>\n";
+        }
+
+        html += "  </table>\n";
+    }
+
+    html += "</body>\n</html>";
+    return html;
 }
 
 // ============================================================
@@ -342,7 +501,7 @@ string resultsPage(const string& playerName, int score, int correctCount,
 }
 
 // ============================================================
-// Leaderboard Page
+// Leaderboard Page (standalone, after completing a round)
 // ============================================================
 
 string leaderboardPage(const vector<Player>& board, const string& currentPlayer,
@@ -393,7 +552,7 @@ string leaderboardPage(const vector<Player>& board, const string& currentPlayer,
     }
 
     body += "<div class=\"nav-links\">\n";
-    body += "  <a href=\"/\" class=\"btn\">Play Again</a>\n";
+    body += "  <a href=\"/\" class=\"btn\">Back to Dashboard</a>\n";
     body += "</div>\n";
 
     return htmlShell("Leaderboard - Guess the Output", body);
