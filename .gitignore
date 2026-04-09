@@ -1,0 +1,11 @@
+# Compiled binary
+guess_the_output
+
+# Object files
+*.o
+
+# Leaderboard data (generated at runtime)
+leaderboard.txt
+
+# macOS
+.DS_Store
