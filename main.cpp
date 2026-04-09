@@ -23,8 +23,8 @@ using namespace std;
 // File where scores are saved
 const string LEADERBOARD_FILE = "leaderboard.txt";
 
-// Total questions per round
-const int QUESTIONS_PER_ROUND = 5;
+// Total questions per round (set from question bank size at startup)
+int QUESTIONS_PER_ROUND = 0;
 
 // Base points for a correct answer
 const int BASE_POINTS = 20;
@@ -41,6 +41,7 @@ int main() {
 
     // Load question bank
     questionBank = loadQuestionBank();
+    QUESTIONS_PER_ROUND = questionBank.size();
     cout << "Loaded " << questionBank.size() << " questions." << endl;
 
     // Create the web server
@@ -188,7 +189,7 @@ int main() {
         writeLeaderboard(LEADERBOARD_FILE, board);
         leaderboardMutex.unlock();
 
-        string html = leaderboardPage(board, name, rank);
+        string html = leaderboardPage(board, name, rank, QUESTIONS_PER_ROUND);
         res.set_content(html, "text/html");
     });
 
@@ -200,7 +201,7 @@ int main() {
         vector<Player> board = readLeaderboard(LEADERBOARD_FILE);
         leaderboardMutex.unlock();
 
-        string html = leaderboardPage(board, "", 0);
+        string html = leaderboardPage(board, "", 0, QUESTIONS_PER_ROUND);
         res.set_content(html, "text/html");
     });
 

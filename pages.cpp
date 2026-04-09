@@ -346,7 +346,7 @@ string resultsPage(const string& playerName, int score, int correctCount,
 // ============================================================
 
 string leaderboardPage(const vector<Player>& board, const string& currentPlayer,
-                       int playerRank) {
+                       int playerRank, int totalQuestions) {
 
     string body = "";
     body += "<h1>Leaderboard</h1>\n";
@@ -385,7 +385,7 @@ string leaderboardPage(const vector<Player>& board, const string& currentPlayer,
             body += "<td>#" + to_string(i + 1) + "</td>";
             body += "<td>" + board[i].name + marker + "</td>";
             body += "<td>" + to_string(board[i].score) + "</td>";
-            body += "<td>" + to_string(board[i].correctCount) + "/5</td>";
+            body += "<td>" + to_string(board[i].correctCount) + "/" + to_string(totalQuestions) + "</td>";
             body += "</tr>\n";
         }
 

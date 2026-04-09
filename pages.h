@@ -33,6 +33,6 @@ string resultsPage(const string& playerName, int score, int correctCount,
 
 // Leaderboard page showing top 10
 string leaderboardPage(const vector<Player>& board, const string& currentPlayer,
-                       int playerRank);
+                       int playerRank, int totalQuestions);
 
 #endif
