@@ -207,10 +207,16 @@ int main() {
     // ----------------------------------------------------------
     // Start the server
     // ----------------------------------------------------------
+    // Use PORT from environment (Railway sets this), default to 8080
     int port = 8080;
+    const char* envPort = getenv("PORT");
+    if (envPort != nullptr) {
+        port = atoi(envPort);
+    }
+
     cout << "============================================" << endl;
     cout << "  Guess the Output - Server Running!" << endl;
-    cout << "  Open your browser to: http://localhost:" << port << endl;
+    cout << "  Listening on port: " << port << endl;
     cout << "============================================" << endl;
 
     server.listen("0.0.0.0", port);
